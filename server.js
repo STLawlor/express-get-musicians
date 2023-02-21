@@ -11,8 +11,16 @@ const port = 3000;
 // });
 
 app.use("/musicians/:id", async (request, response) => {
-  let musician = await Musician.findByPk(request.params.id);
-  response.json(musician);
+  try {
+    let musician = await Musician.findByPk(request.params.id);
+    if (!musician) {
+      throw new Error("Musician not found");
+    } else {
+      response.json(musician);
+    } 
+  } catch (err) {
+    response.status(404).send(err.message)
+  }
 });
 
 app.listen(port, () => {
