@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const { check, validationResult } = require("express-validator");
 const { Musician } = require("../models/Musician");
 
 const musicianRouter = Router();
@@ -29,14 +30,26 @@ musicianRouter.get("/:id", async (req, res) => {
   }
 });
 
-musicianRouter.post("/", async (req, res) => {
-  try {
-    await Musician.create(req.body);
-    res.send("Musician created");
-  } catch (err) {
-    res.send(err.message);
+musicianRouter.post(
+  "/",
+  [
+    check("name").not().isEmpty().trim(),
+    check("instrument").not().isEmpty().trim(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({ error: errors.array() });
+    } else {
+      try {
+        await Musician.create(req.body);
+        res.send("Musician created");
+      } catch (err) {
+        res.send(err.message);
+      }
+    }
   }
-});
+);
 
 musicianRouter.put("/:id", async (req, res) => {
   try {
